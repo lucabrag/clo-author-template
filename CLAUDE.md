@@ -25,7 +25,7 @@
 ├── CLAUDE.MD                    # This file
 ├── .claude/                     # Rules, skills, agents, hooks
 ├── Bibliography_base.bib        # Centralized bibliography
-├── paper/                       # Main LaTeX manuscript (source of truth)
+├── paper/                       # Main LaTeX manuscript (source of truth; syncs with Overleaf)
 │   ├── main.tex                 # Primary paper file
 │   ├── sections/                # Section-level .tex files
 │   ├── figures/                 # Generated figures (.pdf, .png)

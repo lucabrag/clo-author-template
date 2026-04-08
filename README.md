@@ -7,7 +7,8 @@ A Claude Code workflow template for academic research papers. Provides a complet
 1. **Use this template** (or clone/fork) to create a new repository for your paper
 2. Fill in `CLAUDE.md` — project name, institution, field, analysis languages
 3. Fill in `.claude/references/domain-profile.md` — your field's conventions, data sources, seminal references
-4. Start working: `claude` in the project directory
+4. (Optional) Connect to **Overleaf** via GitHub sync — see below
+5. Start working: `claude` in the project directory
 
 ## What's Included
 
@@ -62,8 +63,8 @@ After creating your repo from this template:
 - [ ] `.claude/references/domain-profile.md` — Your field's journals, data, notation, seminal papers
 - [ ] `.claude/settings.json` — Add language-specific permissions (e.g., `Bash(stata *)` for Stata)
 - [ ] `Bibliography_base.bib` — Seed with your initial references
-- [ ] `paper/main.tex` — Your paper's LaTeX source
-- [ ] `paper/preambles/` — Your .bst file and LaTeX headers
+- [ ] `paper/main.tex` — Your paper's LaTeX source (optional — `/new-project` and `/write` create this for you)
+- [ ] `paper/preambles/` — Your .bst file and LaTeX headers (optional — needed only for compilation)
 
 ## Architecture
 
@@ -85,6 +86,17 @@ Critic scores output (0-100)
     |
     +--> 3 strikes? --> Escalate per routing table
 ```
+
+## Overleaf Integration
+
+This template works seamlessly with Overleaf's GitHub sync:
+
+1. Create your repo from this template on GitHub
+2. In Overleaf: **New Project → Import from GitHub** → select your repo
+3. Overleaf syncs the `paper/` directory (and everything else) bidirectionally
+4. Edit in Overleaf for real-time collaboration; use Claude Code for AI-assisted drafting, analysis, and review
+
+**Workflow:** GitHub is the backbone. Overleaf pulls/pushes via GitHub sync. Claude Code reads/writes the same files locally. Both always stay in sync through git.
 
 ## Two-Template System
 
