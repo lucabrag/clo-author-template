@@ -1,0 +1,63 @@
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.nav
+*.snm
+*.vrb
+*.run.xml
+*.bcf
+
+# Compiled output (keep source, not binaries)
+# Uncomment if you want to track PDFs:
+# !paper/main.pdf
+*.pdf
+
+# Data (too large / sensitive for git)
+data/raw/*
+data/cleaned/*
+!data/raw/.gitkeep
+!data/cleaned/.gitkeep
+
+# R
+.Rhistory
+.Rdata
+.RData
+.Rproj.user/
+renv/library/
+
+# Stata
+*.dta
+*.smcl
+*.gph
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code session state (local only)
+.claude/state/
+
+# Local settings (machine-specific overrides)
+.claude/settings.local.json
