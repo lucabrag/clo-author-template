@@ -21,6 +21,10 @@
 # !paper/main.pdf
 *.pdf
 
+# But always track supporting documents (voice exemplars, foundational papers,
+# competitor papers) -- used by the prose-editor agent and project context.
+!master_supporting_docs/**
+
 # Data (too large / sensitive for git)
 data/raw/*
 data/cleaned/*
