@@ -40,7 +40,7 @@ Interview style:
 - **Build on answers.** Each question should follow from the previous response.
 - **Know when to stop.** If the researcher has a clear vision after 4-5 exchanges, move to the specification.
 
-After interview (5-8 exchanges), produce:
+After interview (5-8 exchanges), produce three outputs:
 
 **Output 1: Research Specification** → `quality_reports/research_spec_[topic].md`
 ```markdown
@@ -57,6 +57,14 @@ After interview (5-8 exchanges), produce:
 
 **Output 2: Domain Profile** → `.claude/references/domain-profile.md` (if still template)
 Fill in field, target journals, common data sources, identification strategies, field conventions, seminal references, and referee concerns based on the interview.
+
+**Output 3: Decision Record** → `quality_reports/decisions/discovery_[topic].md`
+Using `templates/decision-record.md`, record:
+- **Decision:** The research question chosen
+- **Alternatives:** Other angles, framings, or questions that came up during the interview
+- **Why rejected:** For each alternative, why this framing was preferred (scope, data availability, novelty, feasibility)
+- **Key assumptions:** What must hold for this question to be answerable
+- **What would invalidate:** What would force a pivot (e.g., "if the policy change turns out to have been anticipated")
 
 ### `/discover lit [topic]` — Literature Review
 Search and synthesize academic literature.
@@ -82,6 +90,12 @@ Workflow:
 6. Dispatch librarian-critic to check coverage, gaps, recency, scope
 7. If gaps found, re-dispatch Librarian for targeted search (max 1 round)
 8. Save to `quality_reports/lit_review_[topic].md`
+9. Generate interactive HTML bibliography and refresh dashboard:
+```bash
+python3 scripts/generate_html_report.py literature quality_reports/lit_review_[topic].md
+python3 scripts/generate_dashboard.py
+```
+Open the HTML report for the user: `open quality_reports/lit_review_[topic].html`
 
 **Unverified citations:** If you cannot verify a citation, mark the BibTeX entry with `% UNVERIFIED`. Do NOT fabricate or guess citation details. Note when working papers have been published — cite the published version.
 
@@ -148,6 +162,20 @@ Generate:
 2. For each: potential identification strategy, data requirements, expected contribution
 3. Rank by feasibility and novelty
 4. Save to `quality_reports/research_ideas_[topic].md`
+
+---
+
+## Bundled Resources
+
+| Resource | Path | What It Contains |
+|----------|------|-----------------|
+| Research spec | `discover/templates/research-spec.md` | 8-section research specification output format |
+| Interview flow | `discover/templates/interview-flow.md` | 6-category conversational structure for interview mode |
+| Lit review entry | `discover/templates/lit-review-entry.md` | Per-paper annotation format with proximity scoring |
+| Data assessment | `discover/templates/data-assessment.md` | Data source evaluation with 5-point critique and feasibility grades |
+| Research ideas | `discover/templates/research-ideas.md` | Ideation output format with feasibility/novelty ranking |
+| PDF processing | `discover/references/pdf-processing.md` | Safe workflow for reading reference papers |
+| Gotchas | `discover/gotchas.md` | Known failure points and edge cases |
 
 ---
 

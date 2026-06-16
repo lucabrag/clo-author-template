@@ -63,6 +63,8 @@ The following preamble is the project standard. New papers should use this struc
 \usepackage{siunitx}
 \usepackage[flushleft]{threeparttable}
 \usepackage{rotating, tabularx}
+\usepackage{tabularray}
+\UseTblrLibrary{booktabs, siunitx}
 
 % ====== Figure and Caption Packages ======
 \usepackage{graphicx, subcaption}
@@ -123,25 +125,33 @@ The following preamble is the project standard. New papers should use this struc
 \setcounter{biburlucpenalty}{8000}
 \setcounter{biburlnumpenalty}{9000}
 
-% ====== Hyperref (loaded last) ======
+% ====== Hyperref (loaded second-to-last) ======
 \usepackage[hidelinks, breaklinks, colorlinks=true,
             linkcolor=citationcolor, citecolor=citationcolor,
             urlcolor=citationcolor]{hyperref}
+
+% ====== Cleveref (loaded after hyperref) ======
+\usepackage[nameinlink]{cleveref}
 ```
 
 ## Key Design Decisions
 
+**Required** items are blocking — the writer-critic deducts points for violations. **Recommended** items improve output quality but are not publication blockers.
+
 | Choice | Standard | Rationale |
 |--------|----------|-----------|
 | `biblatex` + `biber` | Required | Replaces `natbib` + `bibtex`. More flexible, better Unicode, `natbib=true` preserves `\citet`/`\citep` |
-| `lmodern` | Required | Clean Latin Modern font; compatible with all LaTeX engines |
-| `microtype` | Required | Improved character spacing and margin kerning |
 | `fancyhdr` | Required | Clean centered page numbers, no header rule |
-| Citation color `(0,127,255)` | Default | Azure — visible but professional. Consistent across citations, links, URLs |
 | `\doublespacing` | Required | Standard for working paper submissions |
-| `captionsetup` | Required | Small font, bold labels — matches journal style |
-| `hidelinks` in `hyperref` | Required | No colored boxes around links; colors applied via `colorlinks` |
-| `hyperref` loaded last | Required | Avoids conflicts with other packages |
+| `booktabs` + `threeparttable` | Required | Professional tables with proper notes — see content-standards.md |
+| `tabularray` | Required | Modern table engine with key-value interface. Use `tblr`/`talltblr` for new tables; `tabular` + `threeparttable` still accepted for R-generated output |
+| `hyperref` loaded second-to-last | Required | Avoids conflicts with other packages |
+| `cleveref` loaded after `hyperref` | Required | Auto-generates "Figure 1", "Table 2" from `\cref{}` — eliminates `Figure~\ref{}` boilerplate |
+| `lmodern` | Recommended | Clean Latin Modern font; Computer Modern also acceptable |
+| `microtype` | Required | Improved character spacing and margin kerning — standard for modern LaTeX |
+| Citation color `(0,127,255)` | Recommended | Azure — visible but professional. Can be customized |
+| `captionsetup` | Recommended | Small font, bold labels — improves appearance |
+| `hidelinks` in `hyperref` | Recommended | No colored boxes around links; aesthetic preference |
 
 ## Title Page Format
 
@@ -202,7 +212,8 @@ Each section uses `\section{}` with `\label{sec:name}`. Subsections use `\subsec
 ## Tables and Figures
 
 - Tables and figures placed inline (modern standard)
-- Use `\begin{threeparttable}` for tables with notes
+- **Hand-written tables:** prefer `tblr` / `talltblr` (tabularray) with key-value interface for captions, notes, and rules
+- **R/Python/Julia-generated tables:** continue exporting bare `tabular` (booktabs rules). Wrap with `threeparttable` in `main.tex`
 - `\captionsetup` handles caption styling globally — no manual `\small` on captions
 - Use `booktabs` rules (`\toprule`, `\midrule`, `\bottomrule`) — never `\hline`
 - Generated `.tex` files contain bare `tabular` only — no `\begin{table}`, `\caption`, or notes
@@ -215,28 +226,31 @@ Each section uses `\section{}` with `\label{sec:name}`. Subsections use `\subsec
 ```
 
 - `\printbibliography` replaces `\bibliography{}`/`\bibliographystyle{}`
-- Compile with `biber` (not `bibtex`): `xelatex → biber → xelatex → xelatex`
+- Compile with `latexmk` (handles biber passes automatically): `cd paper && latexmk main.tex`
 - Single-spaced or `\small` references
 - New page before references
 
 ## Compilation
 
 ```bash
-xelatex new_main.tex
-biber new_main
-xelatex new_main.tex
-xelatex new_main.tex
+# Preferred: latexmk handles multi-pass + biber automatically
+cd paper && latexmk main.tex
+
+# Manual fallback (if latexmk unavailable):
+xelatex main.tex
+biber main
+xelatex main.tex
+xelatex main.tex
 ```
 
-Note: `biber` replaces `bibtex` when using `biblatex`.
+Note: `paper/latexmkrc` configures XeLaTeX mode, TEXINPUTS, and BIBINPUTS. On Overleaf, set compiler to XeLaTeX via Menu — Overleaf reads `latexmkrc` automatically.
 
 ## What the Writer-Critic Checks
 
-The writer-critic deducts points for:
+**Required (blocking deductions):**
 - Wrong document class or font size (-5)
 - Missing `\doublespacing` in body (-5)
 - Using `natbib` instead of `biblatex` (-3)
-- Missing `microtype` (-2)
 - Missing `fancyhdr` page number setup (-2)
 - `\textbf{}` wrapping `\title{}` (-3)
 - `\and` between authors instead of `\quad` (-3)
@@ -245,6 +259,15 @@ The writer-critic deducts points for:
 - `\hline` instead of `booktabs` rules (-3)
 - Missing table notes on any table (-5)
 - Missing figure notes on any figure (-5)
-- `hyperref` not loaded last (-2)
-- Missing caption styling (`captionsetup`) (-2)
+- `hyperref` not loaded second-to-last (-2)
+- Missing `cleveref` after `hyperref` (-2)
+- Manual `Figure~\ref{}` instead of `\cref{}` (-1 per, max -5)
 - Using `bibtex` instead of `biber` (-3)
+
+- Missing `microtype` (-2)
+
+**Recommended (advisory — reported but not deducted):**
+- Missing `lmodern`
+- Non-default citation color
+- Missing `captionsetup`
+- Missing `hidelinks`

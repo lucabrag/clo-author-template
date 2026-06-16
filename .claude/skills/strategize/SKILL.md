@@ -1,13 +1,13 @@
 ---
 name: strategize
-description: Design identification strategy or pre-analysis plan. Dispatches Strategist (proposer) and strategist-critic (validator). Replaces /identify and /pre-analysis-plan.
-argument-hint: "[mode: strategy | pap | pap interactive] [research question or spec path]"
+description: Design identification strategy, pre-analysis plan, or formal theory section. Dispatches Strategist / Theorist (proposer) and the paired critic (validator). Replaces /identify and /pre-analysis-plan.
+argument-hint: "[mode: strategy | pap | pap interactive | theory] [research question or spec path]"
 allowed-tools: Read,Grep,Glob,Write,Task
 ---
 
 # Strategize
 
-Design an identification strategy or pre-analysis plan by dispatching the **Strategist** (proposer) and **strategist-critic** (validator).
+Design an identification strategy, pre-analysis plan, or formal theory section by dispatching the appropriate creator (**Strategist** or **Theorist**) and its paired critic.
 
 **Input:** `$ARGUMENTS` — mode keyword followed by research question or path to research spec.
 
@@ -22,7 +22,29 @@ Design the causal identification strategy.
 **Output:** Strategy memo + robustness plan + falsification tests
 
 Workflow:
-1. Read research spec, literature review, and data assessment if they exist
+1. **Pre-Strategy Report (mandatory).** Before proposing any strategy, the Strategist must output a structured report proving it read the discovery inputs:
+
+```markdown
+## Pre-Strategy Report
+**Research spec:** [path or "not found"]
+**Literature review:** [path or "not found"]
+**Data assessment:** [path or "not found"]
+**Domain profile:** [loaded / not found]
+
+**Research question:** [one sentence from spec]
+**Key findings from literature:**
+- [What methods have been used for this question]
+- [What gaps remain]
+**Available data:**
+- [Dataset name] — [key variables, coverage, access]
+- [Variation available for identification]: [describe]
+**Candidate designs from domain profile:** [list relevant designs]
+
+Proceeding to strategy design.
+```
+
+If research spec, literature review, or data assessment are missing, the Strategist proceeds with ASSUMED placeholders — but flags each clearly.
+
 2. Read .claude/references/domain-profile.md for common identification strategies in the field
 3. Dispatch Strategist to produce:
    - Strategy memo: design choice, estimand, assumptions, comparison group
@@ -38,6 +60,18 @@ Workflow:
 5. If CRITICAL issues found, iterate (max 3 rounds per three-strikes)
 6. Save memo to `quality_reports/strategy_memo_[topic].md`
 7. Save review to `quality_reports/strategy_memo_[topic]_review.md`
+8. Generate HTML version and refresh dashboard:
+   ```bash
+   python3 scripts/generate_html_report.py strategy-review quality_reports/strategy_memo_[topic]_review.md
+   python3 scripts/generate_dashboard.py
+   ```
+9. **Save decision record** → `quality_reports/decisions/strategy_[topic].md`
+   Using `templates/decision-record.md`, record:
+   - **Decision:** The chosen identification strategy (design + estimator)
+   - **Alternatives:** Other designs the Strategist considered (e.g., IV, RDD, SC, selection-on-observables)
+   - **Why rejected:** For each, the specific reason (no valid instrument, insufficient density at cutoff, no clean donor pool, etc.)
+   - **Key assumptions:** What must hold (parallel trends, exclusion restriction, continuity, etc.)
+   - **What would invalidate:** What findings would force a strategy change (pre-trends failure, weak first stage, manipulation at cutoff)
 
 ### `/strategize pap [spec]` — Pre-Analysis Plan
 Draft a pre-analysis plan following AEA/OSF/EGAP standards.
@@ -151,9 +185,114 @@ Save PAP to `quality_reports/pre_analysis_plan_[topic].md`
 
 ---
 
+### `/strategize theory [target]` — Formal Theory Section
+
+Produce a formal theory section: assumptions, definitions, lemmas, theorems, and proofs.
+
+**When to use:**
+- Paper type is **econometric methods** (the method is the contribution)
+- Paper type is **theory + empirics** (theoretical predictions are tested)
+- Paper type is **structural** (identification of structural parameters needs formal argument)
+- Paper type is **methodological reduced-form** (the design contributes a new estimator)
+
+**Skip this mode** for applied papers that use off-the-shelf estimators — the strategist's memo is sufficient.
+
+**Input:** `$ARGUMENTS` — research question, path to strategy memo, or path to existing paper/draft.
+
+**Agents:** Theorist → theorist-critic
+**Output:** Theory memo + assumptions.tex + results.tex + proofs.tex + notation glossary
+
+Workflow:
+1. **Pre-Theory Report (mandatory).** Before writing any math, the Theorist must output a structured report showing what was read:
+
+```markdown
+## Pre-Theory Report
+**Research spec:** [path or "not found"]
+**Strategy memo:** [path or "not found"]
+**Existing paper/draft:** [path or "not found"]
+**Domain profile:** [loaded / not found]
+**Notation conventions:** [header.tex path / domain-profile notation table / "not found"]
+**Bibliography base:** [path / "not found"]
+
+**Paper type:** [econometric methods / theory+empirics / structural / methodological reduced-form]
+**Theoretical object(s) to produce:** [identification / consistency / asymp. normality / influence function / DML / bootstrap / test / proposition]
+**Data structure:** [iid / panel / staggered / clustered / triangular array]
+**Target parameter:** [definition as functional of P]
+**Estimator:** [definition]
+**Assumptions anticipated:** [A1 sampling, A2 parallel trends, ...]
+
+Proceeding to theory drafting.
+```
+
+If strategy memo or paper type is missing, the Theorist flags it and asks before proceeding.
+
+2. Read `.claude/references/domain-profile.md` for the Theoretical Foundational References table and Author Team table.
+3. Dispatch **Theorist** to produce:
+   - `quality_reports/theory/[topic]/theory_memo.md`
+   - `quality_reports/theory/[topic]/assumptions.tex`
+   - `quality_reports/theory/[topic]/results.tex`
+   - `quality_reports/theory/[topic]/proofs.tex`
+   - `quality_reports/theory/[topic]/notation_glossary.md`
+4. Dispatch **theorist-critic** to review through 4 sequential phases:
+   - Phase 1: Claim identification (object type, target parameter, estimator, assumptions)
+   - Phase 2: Proof validity (logical, measurability, expansions, identification, asymptotic distribution) — **early-stop on critical gaps**
+   - Phase 3: Assumption minimality + statement calibration + notation consistency (INV-7)
+   - Phase 4: Citation fidelity + linkage to empirical claims + exposition
+5. If CRITICAL issues found, iterate (max 3 rounds per three-strikes). Escalation target: User.
+6. Save review to `quality_reports/theory_[topic]_review.md`
+7. **Save decision record** → `quality_reports/decisions/theory_[topic].md`
+   Record:
+   - **Decision:** The theoretical objects proved (identification, asymptotic distribution, etc.)
+   - **Assumptions:** Full list with interpretation
+   - **What's open:** What the theory does NOT cover (caveats for the writer)
+   - **Linkage:** Which empirical claims each theorem supports
+
+---
+
+## Bundled Resources
+
+### Templates
+| File | Purpose |
+|------|---------|
+| `strategize/templates/pre-strategy-report.md` | Mandatory pre-check report before designing strategy |
+| `strategize/templates/strategy-memo.md` | Strategy memo output format (5 required sections) |
+| `strategize/templates/robustness-plan.md` | Ordered robustness checklist template |
+| `strategize/templates/theory-memo.md` | Theory section output format (assumptions, results, proofs) |
+| `strategize/templates/decision-record.md` | Template for documenting strategy decisions with alternatives |
+
+### Design Checklists
+| File | Design |
+|------|--------|
+| `strategize/templates/design-checklists/did.md` | Difference-in-Differences (parallel trends, staggered, estimator selection) |
+| `strategize/templates/design-checklists/iv.md` | Instrumental Variables (relevance, exclusion, monotonicity, LATE) |
+| `strategize/templates/design-checklists/rdd.md` | Regression Discontinuity (bandwidth, manipulation, balance) |
+| `strategize/templates/design-checklists/event-study.md` | Event Study (pre-trends, binning, heterogeneity-robust estimators) |
+| `strategize/templates/design-checklists/structural.md` | Structural Estimation (model environment, identification, counterfactuals) |
+| `strategize/templates/design-checklists/descriptive.md` | Descriptive/Measurement (construction, validation, decomposition) |
+
+### PAP Templates
+| File | Registry |
+|------|----------|
+| `strategize/templates/pap-templates/aea-rct.md` | AEA RCT Registry (most structured, all fields required) |
+| `strategize/templates/pap-templates/osf.md` | OSF (flexible, good for observational studies) |
+| `strategize/templates/pap-templates/egap.md` | EGAP (development/political science, governance emphasis) |
+
+### References
+| File | Purpose |
+|------|---------|
+| `strategize/references/pap-interview-flow.md` | 6-question guided interview for building a PAP interactively |
+
+### Gotchas
+| File | Purpose |
+|------|---------|
+| `strategize/gotchas.md` | Known failure points: design selection traps, memo pitfalls, PAP anti-patterns, theory-mode caveats |
+
+---
+
 ## Principles
 
 - **Strategist proposes, strategist-critic critiques.** Adversarial pairing catches design flaws early.
+- **Theorist proves, theorist-critic checks the proof.** Proof validity gates everything downstream -- notation, citations, polish.
 - **Strategy memo is the contract.** Once approved, the Coder implements it faithfully.
 - **Catch problems before coding.** A flawed strategy caught now saves weeks of wasted analysis.
 - **Multiple strategies are OK.** Present trade-offs and let the user choose.

@@ -1,99 +1,127 @@
 # Domain Profile
 
+<!--
+HOW TO USE: Fill this in manually OR let /discover (interactive interview) generate it.
+All agents read this file to calibrate their field-specific behavior.
+Delete sections that don't apply. Add sections specific to your field.
+If no field is specified, agents default to applied economics.
+-->
+
 ## Field
 
-**Primary:** [YOUR PRIMARY FIELD — e.g., Labor Economics, Development Economics, IO]
-**Adjacent subfields:** [YOUR ADJACENT FIELDS]
+**Primary:** [e.g., Health Economics, Labor Economics, Development, IO, Public Finance]
+**Adjacent subfields:** [e.g., Labor, Public, IO — fields whose methods and journals overlap]
 
 ---
 
 ## Target Journals (ranked by tier)
 
+<!-- The Orchestrator uses this for journal selection. The Librarian prioritizes these in searches. -->
+
 | Tier | Journals |
 |------|----------|
-| Top-5 | [e.g., AER, Econometrica, JPE, QJE, REStud] |
-| Top field | [e.g., JoLE, JHR, JDE, RAND — journals specific to your field] |
-| Strong field | [e.g., JHE, JUE, JEEM — additional field journals] |
+| Top-5 | AER, Econometrica, JPE, QJE, REStud |
+| Top field | [e.g., JHE, RAND JE, AEJ:EP, AEJ:Applied] |
+| Strong field | [e.g., Health Affairs, AJHE, JPubE, JHR] |
+| Specialty | [e.g., Medical Care, Health Services Research] |
 
 ---
 
 ## Common Data Sources
 
+<!-- The Explorer prioritizes these. The explorer-critic knows their quirks. -->
+
 | Dataset | Type | Access | Notes |
 |---------|------|--------|-------|
-| [DATASET 1] | [Survey / Administrative / Experimental] | [Public / Restricted / Author-collected] | [Key features and limitations] |
-| [DATASET 2] | [Type] | [Access] | [Notes] |
-
-<!-- Examples from different fields:
-Economics:    CPS, NLSY, PSID, ACS (public); IRS/SSA admin data (restricted)
-Development:  DHS, LSMS, World Bank Microdata (public); firm surveys (restricted)
-Health:       MEPS, NHIS, Medicare claims (restricted); hospital discharge (restricted)
-Finance:      CRSP, Compustat (institutional); EDGAR filings (public)
--->
+| [e.g., CPS] | [survey/admin/panel] | [public/restricted] | [key strengths and limitations] |
 
 ---
 
 ## Common Identification Strategies
 
+<!-- The Strategist considers these first. The strategist-critic knows field-specific threats. -->
+
 | Strategy | Typical Application | Key Assumption to Defend |
 |----------|-------------------|------------------------|
-| [STRATEGY 1 — e.g., Difference-in-Differences] | [When you use it] | [Main identifying assumption] |
-| [STRATEGY 2 — e.g., Instrumental Variables] | [When you use it] | [Main identifying assumption] |
-| [STRATEGY 3 — e.g., RDD] | [When you use it] | [Main identifying assumption] |
+| [e.g., State-level DiD] | [Policy variation across states] | [Parallel trends in outcomes across treated/control states] |
 
 ---
 
 ## Field Conventions
 
-<!-- Replace with conventions specific to your field. Examples: -->
-- [How papers in your field are typically structured]
-- [Standard notation conventions]
-- [Bibliography style — natbib, biblatex, aea.bst, etc.]
-- [Typical length and format expectations]
-- [Common methodological standards]
+<!-- The Coder and Writer follow these. The writer-critic checks for them. -->
+
+- [e.g., Binary outcomes → report LPM alongside logit/probit marginal effects]
+- [e.g., Cost outcomes → log transform or GLM (Gamma, log link)]
+- [e.g., Clustering at state level for state-level policy variation]
+- [e.g., Always discuss moral hazard / adverse selection implications]
+- [e.g., Welfare analysis expected in top-5 submissions]
 
 ---
 
 ## Notation Conventions
 
+<!-- The Writer and writer-critic enforce these. -->
+
 | Symbol | Meaning | Anti-pattern |
 |--------|---------|-------------|
-| [SYMBOL] | [What it means in your field] | [Common misuse to avoid] |
-| [SYMBOL] | [Meaning] | [Anti-pattern] |
-
-<!-- Examples:
-Labor:    W for wages, H for hours, beta for returns to education
-IO:       p for price, q for quantity, pi for profit, C() for cost function
-Finance:  r for returns, sigma for volatility, beta for market exposure
-Theory:   mu for beliefs, pi for signal structures, Omega for state space
--->
+| [e.g., $Y_{it}$] | [Outcome for individual i at time t] | [Don't use $y$ without subscripts] |
 
 ---
 
 ## Seminal References
 
+<!-- The Librarian ensures these are cited when relevant. The strategist-critic knows their methods. -->
+
 | Paper | Why It Matters |
 |-------|---------------|
-| [AUTHOR (YEAR)] | [Why this is foundational for your field] |
-| [AUTHOR (YEAR)] | [Why it matters] |
-| [AUTHOR (YEAR)] | [Why it matters] |
+| [e.g., Finkelstein et al. (2012)] | [Oregon HIE — gold standard for insurance effects] |
+
+---
+
+## Theoretical Foundational References
+
+<!-- The Theorist and theorist-critic default to these anchors when building or reviewing a theory section.
+     Only needed if the paper has a formal theory section (econometric methods, theory+empirics,
+     structural identification, or methodological reduced-form).
+     Leave empty to fall back to the generic econometric theory defaults baked into the theorist agent. -->
+
+| Topic | Anchor references |
+|-------|------------------|
+| [e.g., DiD with staggered adoption] | [e.g., Callaway & Sant'Anna (2021); Sant'Anna & Zhao (2020)] |
+| [e.g., Semiparametric efficiency] | [e.g., Newey (1990, 1994); Bickel-Klaassen-Ritov-Wellner (1993)] |
+
+---
+
+## Paper Author Team
+
+<!-- Used by the theorist-critic to calibrate respect. If the authors are themselves among the reference
+     literature on a topic, the critic avoids lecturing them on their own contributions.
+     List author surnames + the topics they are foundational on. -->
+
+| Author | Foundational on |
+|--------|----------------|
+| [e.g., Callaway] | [DiD with staggered adoption, $ATT(g,t)$] |
 
 ---
 
 ## Field-Specific Referee Concerns
 
-<!-- What do referees in YOUR field typically worry about? Examples: -->
-- [Typical concern 1 — e.g., "How do you handle selection into treatment?"]
-- [Typical concern 2 — e.g., "What about measurement error in the dependent variable?"]
-- [Typical concern 3 — e.g., "Is the sample period still relevant?"]
-- [Typical concern 4 — e.g., "What's the external validity beyond this setting?"]
+<!-- The domain-referee and methods-referee watch for these. -->
+
+- [e.g., "Why not use the Oregon HIE?" — must address if studying insurance effects]
+- [e.g., "Selection into treatment" — always a concern in health care utilization studies]
+- [e.g., "Moral hazard vs adverse selection" — referees expect you to distinguish]
+- [e.g., "External validity" — Medicaid population ≠ general population]
 
 ---
 
 ## Quality Tolerance Thresholds
 
+<!-- Customize for your domain's standards. Used by quality.md. -->
+
 | Quantity | Tolerance | Rationale |
 |----------|-----------|-----------|
-| Point estimates | 1e-6 | Numerical precision for replication |
-| Standard errors | 1e-4 | Bootstrap / simulation variability |
-| [OTHER QUANTITY] | [TOLERANCE] | [Why] |
+| Point estimates | [e.g., 1e-6] | [Numerical precision] |
+| Standard errors | [e.g., 1e-4] | [MC variability] |
+| Coverage rates | [e.g., ± 0.01] | [Simulation with B reps] |

@@ -1,6 +1,6 @@
 ---
 name: analyze
-description: End-to-end data analysis dispatching Coder and Data-engineer for implementation, coder-critic for review. Supports R, Stata, Python, Julia. Replaces /data-analysis.
+description: End-to-end data analysis dispatching Coder and Data-engineer for implementation, coder-critic for review. Supports R, Python, Julia. Replaces /data-analysis.
 argument-hint: "[dataset path or goal] Options: --dual [lang1,lang2]"
 allowed-tools: Read,Grep,Glob,Write,Edit,Bash,Task
 ---
@@ -15,11 +15,32 @@ Run end-to-end data analysis by dispatching the **Coder** (analysis), **Data-eng
 
 ## Workflow
 
-### Step 1: Context Gathering
-1. Read .claude/references/domain-profile.md for field conventions
-2. Read strategy memo in `quality_reports/` if it exists
-3. Check CLAUDE.md for language preference (R/Stata/Python/Julia)
-4. Scan existing scripts in `scripts/` for project patterns
+### Step 1: Pre-Code Report (mandatory)
+Before writing any code, the Coder must output a structured report proving it read the strategy inputs:
+
+```markdown
+## Pre-Code Report
+**Strategy memo:** [path or "not found"]
+**Domain profile:** [loaded / not found]
+**Language:** [R / Python / Julia — from CLAUDE.md]
+**Paper type:** [reduced-form / structural / theory+empirics / descriptive]
+
+**Identification strategy:** [one sentence from memo]
+**Key variables:**
+- Outcome: [paper name] → [code name]
+- Treatment: [paper name] → [code name]
+- Controls: [list]
+- Fixed effects: [list]
+- Clustering: [level]
+**Data source:** [path or description]
+**Estimator:** [from strategy memo]
+**Robustness checks required:** [list from memo]
+**Naming map confirms:** [yes / no — do planned code names match paper notation?]
+
+Proceeding to implementation.
+```
+
+If the strategy memo is missing, the Coder proceeds with the user's description — but flags that no memo was found and strategic alignment checks (coder-critic categories 1-3) cannot be verified.
 
 ### Step 2: Data Preparation (if needed)
 If raw data provided, dispatch **Data-engineer** first:
@@ -67,6 +88,12 @@ Dispatch **coder-critic** agent — run the full 12-category checklist:
 
 If strategy memo exists, cross-reference code against stated design.
 Save report to `quality_reports/[script]_code_review.md`.
+
+Generate HTML version and refresh dashboard:
+```bash
+python3 scripts/generate_html_report.py code-audit quality_reports/[script]_code_review.md
+python3 scripts/generate_dashboard.py
+```
 
 ### Step 5: Fix Issues
 If coder-critic finds Critical or Major issues:
@@ -133,7 +160,7 @@ This file is the primary handoff artifact to the writer agent. Without it, the w
 
 ## Dual-Language Mode (`--dual r,python`)
 
-When `--dual [lang1,lang2]` is provided (e.g., `--dual r,python`, `--dual r,stata`):
+When `--dual [lang1,lang2]` is provided (e.g., `--dual r,python`, `--dual r,julia`):
 
 1. **Data-engineer** runs once — language-agnostic cleaning, saves to `data/cleaned/`
 2. **Two Coder agents** dispatched in parallel — same strategy memo, different languages
@@ -149,7 +176,7 @@ When `--dual [lang1,lang2]` is provided (e.g., `--dual r,python`, `--dual r,stat
 Inspired by Scott Cunningham's replication methodology: **if two independent implementations agree, neither has a bug.** This is the core rationale for dual-language mode.
 
 **Tolerance thresholds:**
-- **Floating-point differences are normal.** Minor numerical differences (e.g., 1e-10) between R and Python/Stata arise from different linear algebra backends, optimizer defaults, and floating-point arithmetic. These are expected, not bugs.
+- **Floating-point differences are normal.** Minor numerical differences (e.g., 1e-10) between R and Python arise from different linear algebra backends, optimizer defaults, and floating-point arithmetic. These are expected, not bugs.
 - **Point estimates:** Must agree within 1e-6 (relative) or as declared in `domain-profile.md`
 - **Standard errors:** Must agree within 1e-4 (relative) — SE computation varies more across implementations due to degrees-of-freedom corrections and clustering algorithms
 - **P-values:** Must agree on significance at conventional levels (0.01, 0.05, 0.10). If one language says p=0.049 and the other says p=0.051, flag for manual review but do not treat as a bug.
@@ -164,11 +191,40 @@ Inspired by Scott Cunningham's replication methodology: **if two independent imp
 
 ---
 
+## Bundled Resources
+
+### Templates
+| File | Purpose |
+|------|---------|
+| `analyze/templates/pre-code-report.md` | Mandatory pre-check report format before writing code |
+| `analyze/templates/paper-to-code-map.md` | Naming map protocol: paper notation to code variables |
+| `analyze/templates/r-script-structure.R` | Boilerplate R script scaffold following INV-14..19 |
+| `analyze/templates/python-script-structure.py` | Boilerplate Python script scaffold |
+| `analyze/templates/results-summary.md` | Mandatory results summary output for writer handoff |
+
+### References
+| File | Purpose |
+|------|---------|
+| `analyze/references/table-standards.md` | Full table formatting standards: booktabs, coefficient display, panel structure, R packages, file naming |
+| `analyze/references/figure-standards.md` | Full figure formatting standards: themes, colors, axis labels, export settings, common plot types |
+
+### Config
+| File | Purpose |
+|------|---------|
+| `analyze/config/replication-tolerances.json` | Tolerances for dual-language replication comparison (point estimates, SEs, p-values) |
+
+### Gotchas
+| File | Purpose |
+|------|---------|
+| `analyze/gotchas.md` | Known failure points: R package quirks, numerical issues, output traps, cross-language divergence sources |
+
+---
+
 ## Principles
 - **Reproduce, don't guess.** If the user specifies a regression, run exactly that.
 - **Show your work.** Print summary statistics before jumping to regressions.
 - **Strategy alignment.** If strategy memo exists, code MUST implement it faithfully.
 - **Worker-critic pairing.** Coder creates, coder-critic critiques. Never skip review.
-- **saveRDS everything.** Every computed object gets saved via `saveRDS()` for downstream use — model fits, cleaned data frames, summary statistics, not just final tables.
+- **saveRDS everything.** Every computed object gets saved via `saveRDS()` for downstream use -- model fits, cleaned data frames, summary statistics, not just final tables.
 - **Publication-ready output.** Tables and figures directly includable in the paper.
 - **Cross-language convergence.** When `--dual` is used, divergence is a bug until proven otherwise.

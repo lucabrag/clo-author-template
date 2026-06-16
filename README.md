@@ -1,119 +1,206 @@
-# clo-author-template
+# Clo-Author
 
-A Claude Code workflow template for academic research papers. Provides a complete AI-assisted research pipeline from idea to submission, with 18 specialized agents, 10 unified skills, simulated peer review, and R&R cycle management.
+[![Version](https://img.shields.io/github/v/release/hugosantanna/clo-author?style=flat-square&color=b44dff&label=version)](CHANGELOG.md)
 
-## Quick Start
+A Claude Code scaffold for empirical economics research. Literature review to journal submission, with 18 agents that review each other's work.
 
-1. **Use this template** (or clone/fork) to create a new repository for your paper
-2. Fill in `CLAUDE.md` — project name, institution, field, analysis languages
-3. Fill in `.claude/references/domain-profile.md` — your field's conventions, data sources, seminal references
-4. (Optional) Connect to **Overleaf** via GitHub sync — see below
-5. Start working: `claude` in the project directory
+Guide: [hugosantanna.github.io/clo-author](https://hugosantanna.github.io/clo-author/)
 
-## What's Included
+---
 
-### 10 Unified Skills (Commands)
+## To Get Started
 
-| Command | What It Does |
-|---------|-------------|
-| `/new-project [topic]` | Full pipeline: idea to paper (orchestrated) |
-| `/discover [interview\|lit\|data]` | Research spec, literature review, or data discovery |
-| `/strategize [question]` | Identification strategy + adversarial review |
-| `/analyze [dataset]` | End-to-end analysis: scripts, output, code review |
-| `/write [section]` | Draft paper sections + humanizer pass |
-| `/review [file]` | Multi-agent quality review + simulated peer review |
-| `/revise [report]` | Route referee comments, draft response letter |
-| `/talk [format]` | Beamer presentation from paper (4 formats) |
-| `/submit [journal]` | Journal targeting, replication package, final audit |
-| `/tools [subcommand]` | commit, compile, validate-bib, journal, context |
+```bash
+# Fork and clone
+gh repo fork hugosantanna/clo-author --clone
+cd clo-author
 
-### 18 Research Agents
+# Open Claude Code (terminal, VS Code, or JetBrains)
+claude
+```
 
-| Agent | Role |
+Then:
+
+```
+I am starting a research project on [YOUR TOPIC]. Read CLAUDE.md and help me set up.
+```
+
+Claude reads the config, plans the approach, you approve, it runs. Works in the terminal, VS Code extension, or JetBrains.
+
+---
+
+## Setup
+
+1. Fill in `CLAUDE.md` — replace `[BRACKETED PLACEHOLDERS]` with your project details
+2. Fill in `.claude/references/domain-profile.md` — your field, journals, data, methods. Or run `/discover interview` to do it interactively.
+3. Configure your language — R is the default. Python and Julia also supported.
+
+**Other fields:** Economics by default. Adapts to labor, public, health, development, trade, IO, and other applied fields by customizing the domain profile and journal profiles.
+
+---
+
+## Commands
+
+13 skills, each with modes:
+
+| Skill | What It Does |
+|-------|-------------|
+| `/new-project` | Full pipeline: idea to paper |
+| `/discover` | Literature search, data discovery, research interviews |
+| `/strategize` | Identification strategy, pre-analysis plan, formal theory |
+| `/analyze` | Data analysis (R, Python, Julia) |
+| `/write` | Draft paper sections with humanizer pass |
+| `/review` | Quality review — routes by target (paper, code, peer) |
+| `/revise` | R&R cycle: classify referee comments and route fixes |
+| `/talk` | Presentations (Quarto RevealJS or Beamer) |
+| `/submit` | Journal targeting, replication package, final gate |
+| `/tools` | Utilities: commit, compile, validate-bib, journal, deploy |
+| `/checkpoint` | Session handoff: saves progress to memory + Obsidian |
+| `/freeze` | Lock directories from accidental edits |
+| `/careful` | Block destructive shell commands |
+
+---
+
+## Agents
+
+18 agents in worker-critic pairs. Critics can't edit files. Creators can't score themselves. If they disagree after 3 rounds, it escalates.
+
+| Phase | Worker | Critic |
+|-------|--------|--------|
+| Discovery | Librarian | librarian-critic |
+| Discovery | Explorer | explorer-critic |
+| Strategy | Strategist | strategist-critic |
+| Strategy | Theorist | theorist-critic |
+| Execution | Coder | coder-critic |
+| Execution | Data-engineer | coder-critic |
+| Paper | Writer | writer-critic |
+| Peer Review | Editor + domain-referee + methods-referee | — |
+| Presentation | Storyteller | storyteller-critic |
+| Infrastructure | Orchestrator, Verifier | — |
+
+---
+
+## Peer Review
+
+`/review --peer [journal]` simulates a full journal submission:
+
+1. Editor desk review — novelty check via web search, decides desk reject or send out
+2. Two blind referees with intellectual dispositions (Structuralist, Credibility, Measurement, Policy, Theory, Skeptic) weighted by journal culture
+3. Independent scored reports — every major comment includes "what would change my mind"
+4. Editorial decision — FATAL / ADDRESSABLE / TASTE classification, MUST / SHOULD / MAY action items
+
+Additional modes:
+- `--stress` — adversarial referees for pre-submission battle testing
+- `--r2` — R&R second round with referee memory
+- Max 3 rounds, then the editor's patience runs out
+
+30 journal profiles across economics and adjacent fields.
+
+---
+
+## HTML Dashboard
+
+One command generates a self-contained HTML dashboard of your entire project — sections, data, scripts, quality scores, review history. No server, no dependencies. Double-click to open.
+
+```bash
+python3 scripts/generate_dashboard.py
+```
+
+Detail reports drill down into individual components:
+
+```bash
+python3 scripts/generate_html_report.py peer-review [files...]
+python3 scripts/generate_html_report.py code-audit [files...]
+python3 scripts/generate_html_report.py strategy [files...]
+python3 scripts/generate_html_report.py quality-gate [files...]
+python3 scripts/generate_html_report.py literature [files...]
+```
+
+Self-contained HTML with dark mode, collapsible sections, and print support. Works on `file://`.
+
+---
+
+## Quality Gates
+
+Weighted aggregate scoring across all components:
+
+| Score | Gate |
 |-------|------|
-| **orchestrator** | Pipeline manager, dependency graph, escalation routing |
-| **editor** | Journal editor: desk review, referee selection, editorial decisions |
-| **domain-referee** | Blind reviewer (substance, literature, contribution) |
-| **methods-referee** | Blind reviewer (identification, estimation, inference) |
-| **librarian** + critic | Literature search and synthesis |
-| **explorer** + critic | Data discovery and feasibility assessment |
-| **data-engineer** | Data cleaning pipeline |
-| **strategist** + critic | Identification strategy design |
-| **coder** + critic | Analysis scripts (R/Stata/Python/Julia) |
-| **writer** + critic | Paper drafting and polishing |
-| **storyteller** + critic | Beamer talk creation |
-| **verifier** | Compilation, execution, replication checks |
+| 80 | Commit allowed |
+| 90 | PR allowed |
+| 95 | Submission allowed (all components >= 80) |
 
-### 30+ Journal Profiles
+Nothing ships below 80.
 
-Pre-configured referee calibration for journals across Economics (Top-5, AEJ, field), Finance, Accounting, Marketing, and Management. Each profile includes focus, bar, referee adjustments, typical concerns, and referee pool weights.
+---
 
-### Quality Pipeline
-
-- Weighted scoring: Literature 10% + Data 10% + Identification 25% + Code 15% + Paper 25% + Polish 10% + Replication 5%
-- Gates: 80 (commit), 90 (PR), 95 (submission)
-- Worker-critic pairing with three-strikes escalation
-- Context survival hooks (pre-compact state capture, post-compact restore)
-
-## Customization Checklist
-
-After creating your repo from this template:
-
-- [ ] `CLAUDE.md` — Fill in project name, institution, field, languages, folder structure
-- [ ] `.claude/references/domain-profile.md` — Your field's journals, data, notation, seminal papers
-- [ ] `.claude/settings.json` — Add language-specific permissions (e.g., `Bash(stata *)` for Stata)
-- [ ] `Bibliography_base.bib` — Seed with your initial references
-- [ ] `paper/main.tex` — Your paper's LaTeX source (optional — `/new-project` and `/write` create this for you)
-- [ ] `paper/preambles/` — Your .bst file and LaTeX headers (optional — needed only for compilation)
-
-## Architecture
+## Project Structure
 
 ```
-User provides task
-    |
-    v
-Orchestrator checks dependency graph
-    |
-    v
-Dispatches worker-critic pair(s) — parallel when independent
-    |
-    v
-Critic scores output (0-100)
-    |
-    +--> Score >= threshold? --> Advance to next phase
-    |
-    +--> Score < threshold? --> Worker revises (max 3 rounds)
-    |
-    +--> 3 strikes? --> Escalate per routing table
+your-project/
+├── CLAUDE.md                    # Project config (fill in placeholders)
+├── .claude/                     # Agents, skills, rules, hooks
+├── paper/                       # LaTeX manuscript (source of truth)
+│   ├── main.tex
+│   ├── sections/
+│   ├── figures/
+│   ├── tables/
+│   ├── talks/
+│   └── replication/
+├── data/                        # Raw and cleaned datasets
+├── scripts/                     # Analysis code (R, Python, Julia)
+├── quality_reports/             # Reviews, scores, plans, traces
+├── templates/html/              # HTML report design system
+└── explorations/                # Research sandbox
 ```
+
+---
+
+## Prerequisites
+
+| Tool | Install |
+|------|---------|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | `npm install -g @anthropic-ai/claude-code` |
+| XeLaTeX | [TeX Live](https://tug.org/texlive/) or [MacTeX](https://tug.org/mactex/) |
+| R | [r-project.org](https://www.r-project.org/) |
+
+Optional: Python, Julia, [Quarto](https://quarto.org), [gh CLI](https://cli.github.com/).
+
+---
 
 ## Overleaf Integration
 
-This template works seamlessly with Overleaf's GitHub sync:
+This template works with Overleaf's GitHub sync:
 
 1. Create your repo from this template on GitHub
 2. In Overleaf: **New Project → Import from GitHub** → select your repo
 3. Overleaf syncs the `paper/` directory (and everything else) bidirectionally
 4. Edit in Overleaf for real-time collaboration; use Claude Code for AI-assisted drafting, analysis, and review
 
-**Workflow:** GitHub is the backbone. Overleaf pulls/pushes via GitHub sync. Claude Code reads/writes the same files locally. Both always stay in sync through git.
+**Workflow:** GitHub is the backbone. Overleaf pulls/pushes via GitHub sync. Claude Code reads/writes the same files locally. Both always stay in sync through git. Set the Overleaf compiler to XeLaTeX (Menu > Compiler) — it reads `paper/latexmkrc` automatically.
 
-## Two-Template System
+---
 
-This template is for **research papers**. For **teaching/lecture slides** (Beamer + Quarto), see [claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow).
+## Upgrading
 
-| Use Case | Template |
-|----------|----------|
-| Research paper | **This repo** (clo-author-template) |
-| Course lectures | claude-code-my-workflow |
-| Paper talks | **This repo** (via `/talk` skill — Beamer talks from paper) |
+The upgrade only touches `.claude/` (infrastructure). Your paper, scripts, data, and bibliography are never modified.
 
-## Requirements
+```bash
+# Download latest, replace .claude/, done
+```
 
-- [Claude Code](https://claude.ai/claude-code) CLI
-- LaTeX distribution (TeX Live recommended) with XeLaTeX
-- Your analysis language(s): R, Stata, Python, and/or Julia
+Or use `/tools upgrade` from within Claude Code.
 
-## License
+---
 
-MIT
+## This is a Scaffold
+
+Every output needs human review. Claude plans and executes; you decide what ships. The peer review catches structural issues but doesn't replicate actual referee expertise. Quality scores flag problems but don't measure publishability. The writer produces drafts, not final prose.
+
+---
+
+## Origin
+
+Maintained by [Hugo Sant'Anna](https://hsantanna.org) at UAB.
+
+MIT License.

@@ -17,22 +17,30 @@ paths:
 
 ## 1. Table Standards
 
-**Target:** Publication-quality tables matching AER, QJE, and Econometrica formatting.
+**Target:** Publication-quality tables using standard economics formatting (booktabs rules, no vertical rules). Two approaches are supported:
+
+- **tabularray (`tblr` / `talltblr`)** — modern key-value interface. Preferred for hand-written tables in `main.tex`.
+- **`tabular` + `booktabs` + `threeparttable`** — traditional stack. Required for R/Python/Julia-generated output (scripts export bare `tabular`).
+
+Journal-specific conventions (significance stars, note format) adapt to the target journal — see journal-profiles.md.
 
 ### No In-Table Titles or Notes
 
 - **Never** embed titles inside the table body or as a table header row
 - **Never** embed notes, sources, or footnotes inside the table itself
-- Table numbering, titles, and notes are added in LaTeX via `\caption{}` and `\begin{tablenotes}`
+- Table numbering, titles, and notes are added in LaTeX via `\caption{}` and `\begin{tablenotes}` (or tabularray's `note{}` key)
 - The file name and folder identify what the table contains
 
 ### Three-Line Format (Booktabs)
 
 Every table uses exactly three horizontal rules and **zero vertical lines**:
 
+**Traditional (R/Python/Julia output):**
 ```latex
 \begin{table}[htbp]
 \centering
+\begin{threeparttable}
+\caption{Effect of X on Y}\label{tab:main}
 \begin{tabular}{lcccc}
 \toprule
             & (1)     & (2)     & (3)     & (4)     \\
@@ -40,25 +48,58 @@ Every table uses exactly three horizontal rules and **zero vertical lines**:
 ...coefficients...
 \bottomrule
 \end{tabular}
+\begin{tablenotes}\small
+\item \textit{Notes:} Standard errors in parentheses.
+\end{tablenotes}
+\end{threeparttable}
 \end{table}
+```
+
+**Modern (hand-written in main.tex):**
+```latex
+\begin{talltblr}[
+  caption = {Effect of X on Y},
+  label = {tab:main},
+  note{*} = {Standard errors in parentheses.},
+]{colspec = {lcccc}, rowsep = 4pt}
+\toprule
+            & (1)     & (2)     & (3)     & (4)     \\
+\midrule
+...coefficients...
+\bottomrule
+\end{talltblr}
 ```
 
 - `\toprule` above column headers
 - `\midrule` below column headers (and to separate panels)
 - `\bottomrule` at the very end
 - `\cmidrule(lr){2-4}` for partial rules spanning column groups
-- **Use `threeparttable`** — wrap tables with `\begin{threeparttable}` for proper alignment of notes via `\begin{tablenotes}`
+- **R/Python/Julia output:** wrap with `threeparttable` for notes via `\begin{tablenotes}`
+- **Hand-written tables:** prefer `talltblr` with `note{}` keys — unifies caption, label, and notes
 - **Never** use `\hline`, `|`, or any vertical rules
 
 ### Coefficient Display
 
 - Point estimates on one row, standard errors in parentheses on the row below
-- Stars for significance: `*` p < 0.10, `**` p < 0.05, `***` p < 0.01
-- Align significance note at the bottom: `\textit{Notes:} * p < 0.10, ** p < 0.05, *** p < 0.01`
-- Standard errors labeled in the note (e.g., "Robust standard errors in parentheses" or "Clustered at municipality level")
+- Standard errors labeled in the table note (e.g., "Robust standard errors in parentheses" or "Clustered at municipality level")
 
+**Significance reporting depends on the target journal:**
+
+| Context | Convention |
+|---------|-----------|
+| **Working papers (default)** | Stars: `*` p < 0.10, `**` p < 0.05, `***` p < 0.01. Note at bottom: `\textit{Notes:} * p < 0.10, ** p < 0.05, *** p < 0.01` |
+| **AEA journals** (AER, AEJ:Applied, AEJ:Policy, AER:Insights) | No significance stars. Report standard errors in parentheses. Use exact p-values or confidence intervals for key results. See the [AEA Style Guide](https://www.aeaweb.org/journals/aeri/style-guide). |
+| **All other journals** | Stars acceptable. Follow journal-specific conventions in journal-profiles.md. |
+
+Working paper default example:
 ```
 Treatment        & 0.045**  & 0.038*   & 0.052*** \\
+                 & (0.021)  & (0.020)  & (0.019)  \\
+```
+
+AEA journal example:
+```
+Treatment        & 0.045    & 0.038    & 0.052    \\
                  & (0.021)  & (0.020)  & (0.019)  \\
 ```
 
@@ -101,7 +142,7 @@ library(modelsummary)
 modelsummary(
   models,
   output   = "latex_tabular",  # bare tabular, no wrapper
-  stars    = c("*" = 0.10, "**" = 0.05, "***" = 0.01),
+  stars    = c("*" = 0.10, "**" = 0.05, "***" = 0.01),  # set FALSE for AEA journals
   coef_rename = c(
     "treatment"  = "Treatment",
     "log_income" = "Log income"
@@ -124,7 +165,7 @@ fixest::etable(
     yesNo    = c("Yes", "No")
   ),
   se.below = TRUE,
-  signif.code = c("***" = 0.01, "**" = 0.05, "*" = 0.10)
+  signif.code = c("***" = 0.01, "**" = 0.05, "*" = 0.10)  # omit for AEA journals
 )
 ```
 
